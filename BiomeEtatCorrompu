@@ -1,0 +1,55 @@
+using System.Collections;
+using UnityEngine;
+
+public class BiomeEtatCorrompu : BiomesEtatBase
+{
+    private bool active = false;
+    public GameObject bonus;
+
+    public override void InitEtat(BiomeEtatsManager biome)
+    {
+        float randomBonus = Mathf.Floor(Random.Range(0, 3000));
+
+        if (active)
+        {
+            biome.GetComponent<Renderer>().material = biome.GetComponent<Renderer>().material = (Material)Resources.Load("b"+8+"_"+1);
+            active = false;
+        }
+        TextManager.instance.MAJnombreDeBlocs(1);
+        biome.RetireListe();
+        if (randomBonus == 0)
+        {
+            bonus = GameObject.Instantiate((GameObject)Resources.Load("Items/"+20+"_"+0),new Vector3(biome.Cube.transform.position.x, biome.Cube.transform.position.y+1f, biome.Cube.transform.position.z),Quaternion.identity);
+        }
+    }
+    public override void UpdateEtat(BiomeEtatsManager biome)
+    {
+
+    }
+    public override void TriggerEnterEtat(BiomeEtatsManager biome, string nom)
+
+    {
+        // Debug.Log("TriggerEnterEtat");
+        if(!active && nom == "sphere")
+        {
+            biome.StartCoroutine(Anime(biome));
+            active = true;
+            // Debug.Log("activer");
+        }
+    }
+
+    private IEnumerator Anime(BiomeEtatsManager biome)
+    {
+
+        biome.biomeMateriel.shader = biome.shaderGlow;//donne au bloc le shader
+        biome.GetComponent<Renderer>().material = (Material)Resources.Load(biome.biomeMateriel.name);//donne au bloc sa vraie texture non corrompue
+        yield return new WaitForSeconds(0.4f);//coroutine pour attendre 0.5s
+        {
+            biome.GetComponent<Renderer>().material.shader = biome.shaderParDefaut;//redonne au bloc son shader par defaut         
+        }
+        yield return new WaitForSeconds(0.4f);//coroutine pour attendre 0.5s
+        {
+            biome.ChangerEtat(biome.cultivable);    
+        }
+    }
+}
